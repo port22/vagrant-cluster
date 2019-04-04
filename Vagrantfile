@@ -1,5 +1,5 @@
 $provision = <<ENDOFSCRIPT
-#yum -y update ; 
+#yum -y update
 yum makecache fast
 yum -y install epel-release
 #yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm

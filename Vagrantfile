@@ -1,6 +1,10 @@
 $provision = <<ENDOFSCRIPT
 yum -y update ; yum -y install epel-release
-yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+#yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+
+# docker
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum -y install docker-ce
 
 case $HOSTNAME in
  c1) true

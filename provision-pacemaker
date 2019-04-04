@@ -1,0 +1,22 @@
+echo "33.33.33.11 pcs1" >> /etc/hosts
+echo "33.33.33.12 pcs2" >> /etc/hosts
+echo "33.33.33.13 pcs3" >> /etc/hosts
+
+yum install -y pacemaker pcs
+systemctl enable pcsd
+systemctl enable corosync
+systemctl enable pacemaker
+systemctl start pcsd
+
+clusterpw=pacemaker
+echo -n "hacluster:$clusterpw" | chpasswd
+
+case $HOSTNAME in pcs3)
+  pcs cluster auth -u hacluster -p $clusterpw --force pcs1 pcs2 pcs3
+  pcs cluster setup --name cluster --force pcs1 pcs2 pcs3
+  pcs cluster start --all
+  pcs cluster enable --all
+  pcs property set stonith-enabled=false
+  pcs property set no-quorum-policy=ignore
+  pcs resource create ip ocf:heartbeat:IPaddr2 ip=33.33.33.10 cidr_netmask=32 op monitor interval=1s
+;; esac

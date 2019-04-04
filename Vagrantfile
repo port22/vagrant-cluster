@@ -4,7 +4,7 @@ yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
 
 case $HOSTNAME in
  c1) true
-  #docker swarm init --advertise-addr 11.11.11.11
+  docker swarm init --advertise-addr 11.11.11.11
  ;;
 esac
 ENDOFSCRIPT

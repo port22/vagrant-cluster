@@ -1,6 +1,3 @@
-$provision = <<ENDOFSCRIPT
-
-yum makecache
 yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
 yum -y install lvm2 kmod-drbd84 drbd84-utils
 echo "drbd">>/etc/modules-load.d/drbd.conf
@@ -24,45 +21,7 @@ lvcreate --name data --size 5G drbd
 drbdadm create-md r0
 drbdadm up r0
 
-if [[ $HOSTNAME = "drbd1" ]]; then 
+if [[ $HOSTNAME = "pcs1" ]]; then 
     drbdadm primary --force r0
     mkfs.ext4 /dev/drbd1 && mount /dev/drbd1 /mnt
 fi
-
-ENDOFSCRIPT
-
-Vagrant.configure(2) do |config|
-    config.vm.define "drbd1" do |drbd1|
-        drbd1.vm.box = "centos/7"
-        drbd1.vm.hostname = "drbd1"
-        drbd1.vm.network "private_network", ip: "33.33.33.11"
-
-        drbd1.vm.provider :virtualbox do |drbd1|
-            drbd1.customize ["modifyvm", :id, "--memory", "4096"]
-            drbd1.customize ["modifyvm", :id, "--cpus", "4"]
-            drbd1.customize ["modifyvm", :id, "--name", "drbd1"]
-    
-            drbd1.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
-            drbd1.customize ['createhd', '--filename', "1.vdi", '--variant', 'Standard', '--size', 8000]
-            drbd1.customize ['storageattach', :id,  '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "1.vdi"]
-        end
-    end
-
-    config.vm.define "drbd2" do |drbd2|
-        drbd2.vm.box = "centos/7"
-        drbd2.vm.hostname = "drbd2"
-        drbd2.vm.network "private_network", ip: "33.33.33.12"
-
-        config.vm.provider :virtualbox do |drbd2|
-            drbd2.customize ["modifyvm", :id, "--memory", "4096"]
-            drbd2.customize ["modifyvm", :id, "--cpus", "4"]
-            drbd2.customize ["modifyvm", :id, "--name", "drbd2"]
-
-            drbd2.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
-            drbd2.customize ['createhd', '--filename', "2.vdi", '--variant', 'Standard', '--size', 8000]
-            drbd2.customize ['storageattach', :id,  '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "2.vdi"]
-        end
-    end
-
-    config.vm.provision "shell", run: "once", inline: $provision
-end

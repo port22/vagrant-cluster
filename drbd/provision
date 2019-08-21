@@ -5,23 +5,22 @@ depmod -a && modprobe drbd
 
 cat >/etc/drbd.d/r0.res <<EOF
 resource r0 {
-  device    /dev/drbd1;
+  device    /dev/drbd0;
   disk      /dev/mapper/drbd-data;
   meta-disk internal;
-
-  on drbd1 { address   33.33.33.11:7789; }
-  on drbd2 { address   33.33.33.12:7789; }
+ # use the correct hostnames here (/etc/hostname):
+  on pcs1 { address 33.33.33.11:7789; }
+  on pcs2 { address 33.33.33.12:7789; }
 }
 EOF
 
 pvcreate /dev/sdb
 vgcreate drbd /dev/sdb
-lvcreate --name data --size 5G drbd
+lvcreate --name data -l 100%FREE drbd
 
-drbdadm create-md r0
-drbdadm up r0
+drbdadm create-md r0 && drbdadm up r0
 
 if [[ $HOSTNAME = "pcs1" ]]; then 
     drbdadm primary --force r0
-    mkfs.ext4 /dev/drbd1 && mount /dev/drbd1 /mnt
+    mkfs.ext4 /dev/drbd0 && mount /dev/drbd1 /mnt
 fi

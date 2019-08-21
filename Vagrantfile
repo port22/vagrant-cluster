@@ -8,14 +8,14 @@ yum -y install epel-release
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum -y install docker-ce && sudo systemctl enable docker --now
 
-[[ $HOSTNAME = 'c1' ]] && docker swarm init --advertise-addr 11.11.11.11
+[[ $HOSTNAME = 'c1' ]] && docker swarm init --advertise-addr 33.33.33.11
 ENDOFSCRIPT
 
 Vagrant.configure(2) do |config|
     config.vm.define "c1" do |c1|
         c1.vm.box = "centos/7"
         c1.vm.hostname = "c1"
-        c1.vm.network "private_network", ip: "11.11.11.11"
+        c1.vm.network "private_network", ip: "33.33.33.11"
 
         c1.vm.provider :virtualbox do |c1|
             c1.customize ["modifyvm", :id, "--memory", "1024"]
@@ -31,7 +31,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "c2" do |c2|
         c2.vm.box = "centos/7"
         c2.vm.hostname = "c2"
-        c2.vm.network "private_network", ip: "11.11.11.12"
+        c2.vm.network "private_network", ip: "33.33.33.12"
 
         config.vm.provider :virtualbox do |c2|
             c2.customize ["modifyvm", :id, "--memory", "1024"]
@@ -47,7 +47,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "c3" do |c3|
         c3.vm.box = "centos/7"
         c3.vm.hostname = "c3"
-        c3.vm.network "private_network", ip: "11.11.11.13"
+        c3.vm.network "private_network", ip: "33.33.33.13"
 
         config.vm.provider :virtualbox do |c3|
             c3.customize ["modifyvm", :id, "--memory", "1024"]

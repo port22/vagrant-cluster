@@ -1,0 +1,27 @@
+yum -y install http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+yum -y install lvm2 kmod-drbd84 drbd84-utils
+echo "drbd">>/etc/modules-load.d/drbd.conf
+depmod -a && modprobe drbd
+
+cat >/etc/drbd.d/r0.res <<EOF
+resource r0 {
+  device    /dev/drbd1;
+  disk      /dev/mapper/drbd-data;
+  meta-disk internal;
+
+  on drbd1 { address   33.33.33.11:7789; }
+  on drbd2 { address   33.33.33.12:7789; }
+}
+EOF
+
+pvcreate /dev/sdb
+vgcreate drbd /dev/sdb
+lvcreate --name data --size 5G drbd
+
+drbdadm create-md r0
+drbdadm up r0
+
+if [[ $HOSTNAME = "pcs1" ]]; then 
+    drbdadm primary --force r0
+    mkfs.ext4 /dev/drbd1 && mount /dev/drbd1 /mnt
+fi

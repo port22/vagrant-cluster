@@ -2,11 +2,45 @@ echo "33.33.33.11 pcs1" >> /etc/hosts
 echo "33.33.33.12 pcs2" >> /etc/hosts
 echo "33.33.33.13 pcs3" >> /etc/hosts
 
+mkdir -p /etc/corosync
+cat > /etc/corosync/corosync.conf <<EOF
+totem {
+    version: 2
+    cluster_name: hacluster
+    secauth: off
+    transport: udpu
+}
+
+nodelist {
+    node {
+        ring0_addr: pcs1
+        nodeid: 1
+    }
+    node {
+        ring0_addr: pcs2
+        nodeid: 2
+    }
+    node {
+        ring0_addr: pcs3
+        nodeid: 3
+    }
+}
+
+quorum {
+    provider: corosync_votequorum
+}
+
+logging {
+    to_logfile: yes
+    logfile: /var/log/corosync.log
+    to_syslog: yes
+}
+EOF
+
 yum install -y pacemaker pcs
-systemctl enable pcsd
-systemctl enable corosync
-systemctl enable pacemaker
-systemctl start pcsd
+systemctl enable pcsd --now
+systemctl enable corosync --now
+systemctl enable pacemaker --now
 
 clusterpw=pacemaker
 echo -n "hacluster:$clusterpw" | chpasswd
@@ -18,5 +52,5 @@ case $HOSTNAME in pcs3)
   pcs cluster enable --all
   pcs property set stonith-enabled=false
   pcs property set no-quorum-policy=ignore
-  pcs resource create ip ocf:heartbeat:IPaddr2 ip=33.33.33.10 cidr_netmask=32 op monitor interval=1s
+  pcs resource create vip ocf:heartbeat:IPaddr2 ip=33.33.33.33 cidr_netmask=32 op monitor interval=1s
 ;; esac

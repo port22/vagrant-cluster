@@ -8,19 +8,19 @@ yum -y install epel-release
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum -y install docker-ce && sudo systemctl enable docker --now
 
-[[ $HOSTNAME = 'c1' ]] && docker swarm init --advertise-addr 33.33.33.11
+[[ $HOSTNAME = 'pcs1' ]] && docker swarm init --advertise-addr 33.33.33.11
 ENDOFSCRIPT
 
 Vagrant.configure(2) do |config|
-    config.vm.define "c1" do |c1|
+    config.vm.define "pcs1" do |pcs1|
         c1.vm.box = "centos/7"
-        c1.vm.hostname = "c1"
+        c1.vm.hostname = "pcs1"
         c1.vm.network "private_network", ip: "33.33.33.11"
 
-        c1.vm.provider :virtualbox do |c1|
+        c1.vm.provider :virtualbox do |pcs1|
             c1.customize ["modifyvm", :id, "--memory", "1024"]
             c1.customize ["modifyvm", :id, "--cpus", "1"]
-            c1.customize ["modifyvm", :id, "--name", "c1"]
+            c1.customize ["modifyvm", :id, "--name", "pcs1"]
     
 #           c1.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
 #           c1.customize ['createhd', '--filename', "1.vdi", '--variant', 'Standard', '--size', 8000]
@@ -28,15 +28,15 @@ Vagrant.configure(2) do |config|
         end
     end
 
-    config.vm.define "c2" do |c2|
+    config.vm.define "pcs2" do |pcs2|
         c2.vm.box = "centos/7"
-        c2.vm.hostname = "c2"
+        c2.vm.hostname = "pcs2"
         c2.vm.network "private_network", ip: "33.33.33.12"
 
-        config.vm.provider :virtualbox do |c2|
+        config.vm.provider :virtualbox do |pcs2|
             c2.customize ["modifyvm", :id, "--memory", "1024"]
             c2.customize ["modifyvm", :id, "--cpus", "1"]
-            c2.customize ["modifyvm", :id, "--name", "c2"]
+            c2.customize ["modifyvm", :id, "--name", "pcs2"]
 
 #            c2.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
 #            c2.customize ['createhd', '--filename', "2.vdi", '--variant', 'Standard', '--size', 8000]
@@ -44,15 +44,15 @@ Vagrant.configure(2) do |config|
         end
     end
 
-    config.vm.define "c3" do |c3|
+    config.vm.define "pcs3" do |pcs3|
         c3.vm.box = "centos/7"
-        c3.vm.hostname = "c3"
+        c3.vm.hostname = "pcs3"
         c3.vm.network "private_network", ip: "33.33.33.13"
 
-        config.vm.provider :virtualbox do |c3|
+        config.vm.provider :virtualbox do |pcs3|
             c3.customize ["modifyvm", :id, "--memory", "1024"]
             c3.customize ["modifyvm", :id, "--cpus", "1"]
-            c3.customize ["modifyvm", :id, "--name", "c3"]
+            c3.customize ["modifyvm", :id, "--name", "pcs3"]
 
 #            c3.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
 #            c3.customize ['createhd', '--filename', "3.vdi", '--variant', 'Standard', '--size', 8000]

@@ -6,15 +6,9 @@ yum -y install epel-release
 
 # docker
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-yum -y install docker-ce
-sudo systemctl start docker
-sudo systemctl enable docker
+yum -y install docker-ce && sudo systemctl enable docker --now
 
-case $HOSTNAME in
- c1) true
-  docker swarm init --advertise-addr 11.11.11.11
- ;;
-esac
+[[ $HOSTNAME = 'c1' ]] && docker swarm init --advertise-addr 11.11.11.11
 ENDOFSCRIPT
 
 Vagrant.configure(2) do |config|

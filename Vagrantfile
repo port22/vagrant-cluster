@@ -1,4 +1,8 @@
 $provision = <<ENDOFSCRIPT
+echo "33.33.33.11 pcs1" >> /etc/hosts
+echo "33.33.33.12 pcs2" >> /etc/hosts
+echo "33.33.33.13 pcs3" >> /etc/hosts
+
 yum -y update && yum makecache fast && yum -y install epel-release
 
 # docker

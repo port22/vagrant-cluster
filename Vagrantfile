@@ -1,11 +1,11 @@
 $provision = <<ENDOFSCRIPT
-for i in 1 2 3; do echo "33.33.33.1$i pcs$i" >> /etc/hosts ;done
+for i in 1 2 3; do echo "11.11.11.1$i pcs$i" >> /etc/hosts ;done
 yum -y update && yum makecache fast && yum -y install epel-release
 
 # docker
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum -y install docker-ce && sudo systemctl enable docker --now
-[[ $HOSTNAME = 'pcs1' ]] && docker swarm init --advertise-addr 33.33.33.11
+[[ $HOSTNAME = 'pcs1' ]] && docker swarm init --advertise-addr 11.11.11.11
 
 ENDOFSCRIPT
 
@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "pcs1" do |pcs1|
         pcs1.vm.box = "centos/7"
         pcs1.vm.hostname = "pcs1"
-        pcs1.vm.network "private_network", ip: "33.33.33.11"
+        pcs1.vm.network "private_network", ip: "11.11.11.11"
 
         pcs1.vm.provider :virtualbox do |pcs1|
             pcs1.customize ["modifyvm", :id, "--memory", "1024"]
@@ -30,7 +30,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "pcs2" do |pcs2|
         pcs2.vm.box = "centos/7"
         pcs2.vm.hostname = "pcs2"
-        pcs2.vm.network "private_network", ip: "33.33.33.12"
+        pcs2.vm.network "private_network", ip: "11.11.11.12"
 
         config.vm.provider :virtualbox do |pcs2|
             pcs2.customize ["modifyvm", :id, "--memory", "1024"]
@@ -46,7 +46,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "pcs3" do |pcs3|
         pcs3.vm.box = "centos/7"
         pcs3.vm.hostname = "pcs3"
-        pcs3.vm.network "private_network", ip: "33.33.33.13"
+        pcs3.vm.network "private_network", ip: "11.11.11.13"
 
         config.vm.provider :virtualbox do |pcs3|
             pcs3.customize ["modifyvm", :id, "--memory", "1024"]

@@ -30,14 +30,14 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define "pcs2" do |pcs2|
-        pc2.vm.box = "centos/7"
-        pc2.vm.hostname = "pcs2"
-        pc2.vm.network "private_network", ip: "33.33.33.12"
+        pcs2.vm.box = "centos/7"
+        pcs2.vm.hostname = "pcs2"
+        pcs2.vm.network "private_network", ip: "33.33.33.12"
 
         config.vm.provider :virtualbox do |pcs2|
-            pc2.customize ["modifyvm", :id, "--memory", "1024"]
-            pc2.customize ["modifyvm", :id, "--cpus", "1"]
-            pc2.customize ["modifyvm", :id, "--name", "pcs2"]
+            pcs2.customize ["modifyvm", :id, "--memory", "1024"]
+            pcs2.customize ["modifyvm", :id, "--cpus", "1"]
+            pcs2.customize ["modifyvm", :id, "--name", "pcs2"]
             
             pcs2.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
             pcs2.customize ['createhd', '--filename', "pcs2.vdi", '--variant', 'Standard', '--size', 8000]

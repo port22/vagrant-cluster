@@ -13,6 +13,7 @@ yum -y install docker-ce && sudo systemctl enable docker --now
 ENDOFSCRIPT
 
 Vagrant.configure(2) do |config|
+    
     config.vm.define "pcs1" do |pcs1|
         pcs1.vm.box = "centos/7"
         pcs1.vm.hostname = "pcs1"

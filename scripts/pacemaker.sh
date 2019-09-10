@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p /etc/corosync
 cat > /etc/corosync/corosync.conf <<EOF
 totem {
@@ -48,5 +50,5 @@ case $HOSTNAME in pcs3)
   pcs cluster enable --all
   pcs property set stonith-enabled=false
   pcs property set no-quorum-policy=ignore
-  pcs resource create vip ocf:heartbeat:IPaddr2 ip=33.33.33.33 cidr_netmask=32 op monitor interval=1s
+  pcs resource create vip ocf:heartbeat:IPaddr2 ip=11.11.11.111 cidr_netmask=32 op monitor interval=1s
 ;; esac

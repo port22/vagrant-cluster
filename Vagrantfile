@@ -1,63 +1,49 @@
-$provision = <<ENDOFSCRIPT
-for i in 1 2 3; do echo "11.11.11.1$i pcs$i" >> /etc/hosts ;done
-yum -y update && yum makecache fast && yum -y install epel-release
+$provision = <<END
+for i in 1 2 3; do echo "11.11.11.1$i pcs$i" >> /etc/hosts ; done
 
-# docker
-yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-yum -y install docker-ce && sudo systemctl enable docker --now
-[[ $HOSTNAME = 'pcs1' ]] && docker swarm init --advertise-addr 11.11.11.11
+echo "sudo -i" > /home/vagrant/.bashrc
+yum clean all && yum makecache fast 
+yum -y update
+yum -y install epel-release
 
-ENDOFSCRIPT
+# Docker-CE with Swarm
+bash /vagrant/scripts/docker.sh
+
+# Pacemaker
+bash /vagrant/scripts/pacemaker.sh
+
+# DRBD
+bash /vagrant/scripts/drbd.sh
+
+END
 
 Vagrant.configure(2) do |config|
-    
-    config.vm.define "pcs1" do |pcs1|
-        pcs1.vm.box = "centos/7"
-        pcs1.vm.hostname = "pcs1"
-        pcs1.vm.network "private_network", ip: "11.11.11.11"
 
-        pcs1.vm.provider :virtualbox do |pcs1|
-            pcs1.customize ["modifyvm", :id, "--memory", "1024"]
-            pcs1.customize ["modifyvm", :id, "--cpus", "1"]
-            pcs1.customize ["modifyvm", :id, "--name", "pcs1"]
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
+  end
 
-            pcs1.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
-            pcs1.customize ['createhd', '--filename', "pcs1.vdi", '--variant', 'Standard', '--size', 8000]
-            pcs1.customize ['storageattach', :id,  '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "pcs1.vdi"]
-        end
+  (1..3).each do |i|
+    config.vm.define "pcs#{i}" do |pcs|
+       pcs.vm.box = "centos/7"
+       pcs.vm.hostname = "pcs#{i}"
+       pcs.vm.network "private_network", ip: "11.11.11.1#{i}"
+
+       pcs.vm.provider :virtualbox do |c|
+         c.customize ["modifyvm", :id, "--memory", "1024"]
+         c.customize ["modifyvm", :id, "--cpus", "1"]
+         c.customize ["modifyvm", :id, "--name", "pcs#{i}"]
+
+         disk = "pcs#{i}.vdi"
+         unless File.exist?(disk)
+           c.customize ['createhd', '--filename', "pcs#{i}.vdi", '--variant', 'Standard', '--size', 8000]
+         end
+
+         c.customize ['storageattach', :id, '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "pcs#{i}.vdi"]
+       end
     end
+  end       
 
-    config.vm.define "pcs2" do |pcs2|
-        pcs2.vm.box = "centos/7"
-        pcs2.vm.hostname = "pcs2"
-        pcs2.vm.network "private_network", ip: "11.11.11.12"
+  config.vm.provision "shell", run: "once", inline: $provision
 
-        config.vm.provider :virtualbox do |pcs2|
-            pcs2.customize ["modifyvm", :id, "--memory", "1024"]
-            pcs2.customize ["modifyvm", :id, "--cpus", "1"]
-            pcs2.customize ["modifyvm", :id, "--name", "pcs2"]
-            
-            pcs2.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
-            pcs2.customize ['createhd', '--filename', "pcs2.vdi", '--variant', 'Standard', '--size', 8000]
-            pcs2.customize ['storageattach', :id,  '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "pcs2.vdi"]
-        end
-    end
-
-    config.vm.define "pcs3" do |pcs3|
-        pcs3.vm.box = "centos/7"
-        pcs3.vm.hostname = "pcs3"
-        pcs3.vm.network "private_network", ip: "11.11.11.13"
-
-        config.vm.provider :virtualbox do |pcs3|
-            pcs3.customize ["modifyvm", :id, "--memory", "1024"]
-            pcs3.customize ["modifyvm", :id, "--cpus", "1"]
-            pcs3.customize ["modifyvm", :id, "--name", "pcs3"]
-
-            pcs3.customize ['storagectl', :id, '--name', 'scsi', '--add', 'scsi', '--controller', 'LSILogic']
-            pcs3.customize ['createhd', '--filename', "pcs3.vdi", '--variant', 'Standard', '--size', 8000]
-            pcs3.customize ['storageattach', :id,  '--storagectl', 'scsi', '--port', 0, '--device', 0, '--type', 'hdd', '--medium', "pcs3.vdi"]
-        end
-    end
-
-    config.vm.provision "shell", run: "once", inline: $provision
 end

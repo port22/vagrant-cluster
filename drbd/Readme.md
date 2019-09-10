@@ -1,14 +1,4 @@
-## This provision is for lab-testing a pre-provisioned two-node drbd cluster
-##### (without corosync/pacemaker)
-
 Suitable for testing administrative purposes like online resizing.
-Both nodes having two additional 7G disks attached, while only 5G is allocated via LVM
-
-```
-vagrant up
-vagrant ssh pcs1 -c 'sudo su -'
-vagrant ssh pcs2 -c 'sudo su -'
-```
 
 #### How to resize a DRBD volume online (r0 must be in Connected state)
 

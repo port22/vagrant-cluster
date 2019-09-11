@@ -1,19 +1,20 @@
 $provision = <<END
+sed -i "/^127.0.0.1.*$HOSTNAME/d" /etc/hosts
 for i in 1 2 3; do echo "11.11.11.1$i pcs$i" >> /etc/hosts ; done
 
 echo "sudo -i" > /home/vagrant/.bashrc
 yum clean all && yum makecache fast 
-yum -y update
+#yum -y update
 yum -y install epel-release
 
 # Docker-CE with Swarm
-bash /vagrant/scripts/docker.sh
+#bash /vagrant/scripts/docker.sh
 
 # Pacemaker
 bash /vagrant/scripts/pacemaker.sh
 
 # DRBD
-bash /vagrant/scripts/drbd.sh
+#bash /vagrant/scripts/drbd.sh
 
 END
 
@@ -30,8 +31,8 @@ Vagrant.configure(2) do |config|
        pcs.vm.network "private_network", ip: "11.11.11.1#{i}"
 
        pcs.vm.provider :virtualbox do |c|
-         c.customize ["modifyvm", :id, "--memory", "1024"]
-         c.customize ["modifyvm", :id, "--cpus", "1"]
+         c.customize ["modifyvm", :id, "--memory", "2048"]
+         c.customize ["modifyvm", :id, "--cpus", "2"]
          c.customize ["modifyvm", :id, "--name", "pcs#{i}"]
 
          disk = "pcs#{i}.vdi"

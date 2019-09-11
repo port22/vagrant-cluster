@@ -1,39 +1,13 @@
 #!/bin/bash
 
 mkdir -p /etc/corosync
-cat > /etc/corosync/corosync.conf <<EOF
-totem {
-    version: 2
-    cluster_name: hacluster
-    secauth: off
-    transport: udpu
-}
+cp -Rfv /vagrant/scripts/corosync.conf /etc/corosync/corosync.conf
 
-nodelist {
-    node {
-        ring0_addr: pcs1
-        nodeid: 1
-    }
-    node {
-        ring0_addr: pcs2
-        nodeid: 2
-    }
-    node {
-        ring0_addr: pcs3
-        nodeid: 3
-    }
-}
+setenforce 0
+sed -i 's/^SELINUX=/SELINUX=disabled/g' /etc/selinux/config
 
-quorum {
-    provider: corosync_votequorum
-}
-
-logging {
-    to_logfile: yes
-    logfile: /var/log/corosync.log
-    to_syslog: yes
-}
-EOF
+systemctl disable firewalld --now
+systemctl stop firewalld 
 
 yum install -y pacemaker pcs
 systemctl enable pcsd --now
